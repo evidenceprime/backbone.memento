@@ -19,7 +19,7 @@ Backbone.Memento = (function(Backbone, _){
 
     var serializer = new Serializer(structure, config);
     var mementoStack = new MementoStack(structure, config);
-    var finalRedoState;
+    var dirtyState;
 
     var restoreState = function (previousState, restoreConfig){
       if (!previousState){ return false; }
@@ -28,14 +28,14 @@ Backbone.Memento = (function(Backbone, _){
     };
 
     this.store = function(){
-      finalRedoState = null;
+      dirtyState = null;
       var currentState = serializer.serialize();
       mementoStack.push(currentState);
     };
 
     this.restore = function(restoreConfig){
       if (mementoStack.atTop()) {
-        finalRedoState = serializer.serialize();
+        dirtyState = serializer.serialize();
       }
       var previousState = mementoStack.previousElement();
       return restoreState(previousState, restoreConfig);
@@ -46,8 +46,8 @@ Backbone.Memento = (function(Backbone, _){
     this.redo = function(restoreConfig){
       var nextState = mementoStack.nextElement();
       if (!nextState) {
-        nextState = finalRedoState;
-        finalRedoState = null;
+        nextState = dirtyState;
+        dirtyState = null;
       }
       return restoreState(nextState, restoreConfig);
     };
