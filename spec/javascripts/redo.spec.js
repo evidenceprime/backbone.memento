@@ -18,6 +18,41 @@ describe("redo", function(){
     });
   });
 
+  describe("when undoing then redoing multiple unstored changes", function(){
+    beforeEach(function(){
+      this.model.set({foo: "foo 1"});
+      this.model.set({bar: "bar 1"});
+      this.model.store();
+      this.model.set({foo: "foo 2"});
+      this.model.set({bar: "bar 2"});
+      this.model.restore();
+    });
+
+    it("should reset the model to all the unstored changes", function(){
+      expect(this.model.get("foo")).toBe("foo 1");
+      expect(this.model.get("bar")).toBe("bar 1");
+      this.model.redo();
+      expect(this.model.get("foo")).toBe("foo 2");
+      expect(this.model.get("foo")).toBe("foo 2");
+    });
+  });
+
+  describe("when undoing then redoing a change applied without storing first", function(){
+    beforeEach(function(){
+      this.model.set({foo: "foo 1"});
+      this.model.store();
+      this.model.set({foo: "foo 2"});
+      this.model.restore();
+    });
+
+    it("should reset the model to all the unstored changes", function(){
+      expect(this.model.get("foo")).toBe("foo 1");
+      this.model.set({foo: "foo 3"}); // This should be ignored by the redo()
+      this.model.redo();
+      expect(this.model.get("foo")).toBe("foo 2");
+    });
+  });
+
   describe("when redoing and no more mementos exist", function(){
     beforeEach(function(){
       this.model.set({foo: "bar"});
